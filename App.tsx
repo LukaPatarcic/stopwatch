@@ -1,27 +1,35 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Actions from "./components/Actions";
+import Laps from "./components/Laps";
 
 let interval = null;
+
+const formatTimer = (timeElapsed: Date | null) => {
+    if (!timeElapsed) return "";
+    const hours = String(timeElapsed.getUTCHours()).padStart(2, "0");
+    const minutes = String(timeElapsed.getUTCMinutes()).padStart(2, "0");
+    const seconds = String(timeElapsed.getUTCSeconds()).padStart(2, "0");
+    const miliseconds = (timeElapsed.getUTCMilliseconds() / 10)
+        .toFixed(0)
+        .padStart(2, "0");
+    return `${
+        hours != "00" ? `${hours}:` : ""
+    } ${minutes}:${seconds}:${miliseconds}`;
+};
 export default function App() {
-    const [timer, setTimer] = useState(null);
+    const [timer, setTimer] = useState<Date | null>(null);
     const [running, setRunning] = useState(false);
-    const [startTime, setStartTime] = useState<number>(null);
-    const [laps, setLaps] = useState([]);
+    const [startTime, setStartTime] = useState<number | null>(null);
+    const [laps, setLaps] = useState<string[]>([]);
 
     useEffect(() => {
         let counter;
-        const now = new Date().getTime();
         if (running) {
             counter = setInterval(() => {
                 const now = new Date().valueOf();
                 const timeElapsed = new Date(now - startTime);
-                const hours = timeElapsed.getUTCHours();
-                const minutes = timeElapsed.getUTCMinutes();
-                const seconds = timeElapsed.getUTCSeconds();
-                const miliseconds = (
-                    timeElapsed.getUTCMilliseconds() / 10
-                ).toFixed(0);
-                setTimer(`${hours}: ${minutes} : ${seconds}: ${miliseconds}`);
+                setTimer(timeElapsed);
             }, 10);
         }
         return () => {
@@ -29,15 +37,16 @@ export default function App() {
         };
     }, [running]);
 
-    const onStart = () => {
+    const onStart = useCallback(() => {
         setRunning(true);
-        setStartTime(new Date().getTime());
-    };
+        setStartTime((startTime) => startTime ?? new Date().getTime());
+    }, [running, startTime]);
 
-    const onStop = () => {
+    const onStop = useCallback(() => {
+        console.log(timer);
         setRunning(false);
-        clearInterval(interval);
-    };
+        setStartTime(timer.getTime());
+    }, [running, startTime, timer]);
 
     const onReset = () => {
         setTimer(null);
@@ -47,37 +56,21 @@ export default function App() {
     };
 
     const onLap = () => {
-        setLaps((laps) => [...laps, timer]);
+        if (timer === null) return;
+        setLaps((laps) => [...laps, formatTimer(timer)]);
     };
 
     return (
         <View style={styles.container}>
-            <Text>{timer}</Text>
-            <Button
-                onPress={() => (running ? onStop() : onStart())}
-                title={running ? "Stop Timer" : "Start Timer"}
-                color="#841584"
-                accessibilityLabel="Learn more about this purple button"
+            <Text>{formatTimer(timer)}</Text>
+            <Actions
+                running={running}
+                onLap={onLap}
+                onReset={onReset}
+                onStart={onStart}
+                onStop={onStop}
             />
-            <Button
-                onPress={onReset}
-                title="Reset Timer"
-                color="#841584"
-                accessibilityLabel="Learn more about this purple button"
-            />
-            <Button
-                onPress={onLap}
-                title="Lap Time"
-                color="#841584"
-                accessibilityLabel="Learn more about this purple button"
-            />
-            {laps.map((lap, index) => (
-                <View key={index}>
-                    <Text>
-                        {index + 1}. lap - {lap}
-                    </Text>
-                </View>
-            ))}
+            <Laps laps={laps} />
         </View>
     );
 }
