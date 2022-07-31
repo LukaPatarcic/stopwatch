@@ -19,9 +19,12 @@
     },
     "plugins": [
         "react",
+        "prettier",
         "react-native",
         "@typescript-eslint"
     ],
     "rules": {
+        "prettier/prettier": ["error"],
+        "require-jsdoc" : 0
     }
 }

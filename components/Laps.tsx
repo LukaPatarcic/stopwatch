@@ -1,20 +1,27 @@
-import React, { FC } from "react";
-import { Text, View } from "react-native";
+import React, { FC } from 'react';
+import { FlatList, Text, View } from 'react-native';
 import { useTimer } from '../store/useTimer';
 
 const Laps: FC = () => {
     const laps = useTimer((state) => state.laps);
 
     return (
-        <>
-            {laps.map((lap, index) => (
-                <View key={index}>
-                    <Text>
-                        {index + 1}. lap - {lap}
+        <FlatList
+            data={laps}
+            style={{ flex: 1 }}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
+            renderItem={({ item, index }) => (
+                <View
+                    key={index}
+                    style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
+                >
+                    <Text style={{ fontSize: 18 }}>
+                        #{index + 1} - {item}
                     </Text>
                 </View>
-            ))}
-        </>
+            )}
+        />
     );
 };
 
