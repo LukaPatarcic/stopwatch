@@ -41,8 +41,9 @@ const Notification = () => {
     const appState = useRef(AppState.currentState);
     const [appStateVisible, setAppStateVisible] = useState(appState.current);
     const running = useTimer((state) => state.running);
-    const timeDate = useTimer((state) => state.timeDate);
+    const time = useTimer((state) => state.time);
     const onStop = useTimer((state) => state.onStop);
+    const setTime = useTimer((state) => state.setTime);
     const onStart = useTimer((state) => state.onStart);
     const onReset = useTimer((state) => state.onReset);
     const onLap = useTimer((state) => state.onLap);
@@ -54,6 +55,7 @@ const Notification = () => {
     TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
         const now = Date.now();
         console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
+        setTime();
         // Be sure to return the successful result type!
         return BackgroundFetch.BackgroundFetchResult.NewData;
     });
@@ -105,18 +107,16 @@ const Notification = () => {
 
     useEffect(() => {
         if (appStateVisible === 'background' && running) {
-            const newTime = new Date().valueOf() - timeDate.valueOf();
             registerBackgroundFetchAsync();
             scheduleNotificationAsync({
                 content: {
                     categoryIdentifier: CATEGORY_ID,
-                    title: formatTimer(newTime),
-                    body: formatTimer(newTime),
+                    title: time,
                     priority: AndroidNotificationPriority.MIN,
                     sticky: true,
                 },
                 identifier: NOTIFICATION_ID,
-                trigger: { seconds: 1, repeats: true },
+                trigger: { seconds: 1 },
             });
             setNotificationCategoryAsync(CATEGORY_ID, actions(runningActions));
         }

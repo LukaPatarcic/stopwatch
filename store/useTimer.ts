@@ -36,11 +36,9 @@ export const useTimer = create<ITimer>()(
             elapsed: false,
             laps: [],
             setTime: () =>
-                set(({ time, startTime }) => {
-                    console.log(time);
-                    const newTime = formatTimer(
-                        time ? new Date().valueOf() - startTime.valueOf() : new Date().valueOf()
-                    );
+                set(({ startTime }) => {
+                    if (!startTime) return;
+                    const newTime = formatTimer(new Date().valueOf() - startTime.valueOf());
                     return { time: newTime, timeDate: new Date() };
                 }),
             onStart: () =>
@@ -52,19 +50,18 @@ export const useTimer = create<ITimer>()(
                     return {
                         running: true,
                         elapsed: true,
-                        time: formatTimer(now.valueOf()),
                         startTime: elapsed ? continueTime : now,
                     };
                 }),
             onStop: () => set({ running: false, elapsed: true, stopTime: new Date() }),
             onReset: () => {
-                get().onStop();
                 set({
-                    time: null,
-                    laps: [],
+                    running: false,
                     elapsed: false,
                     startTime: null,
                     stopTime: null,
+                    time: null,
+                    laps: [],
                 });
             },
             onLap: () => set(({ laps, time }) => ({ laps: [...laps, time] })),
