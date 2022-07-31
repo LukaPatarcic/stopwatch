@@ -1,11 +1,10 @@
-import React, { FC, memo } from "react";
+import React, { FC } from "react";
 import { Text, View } from "react-native";
+import { useTimer } from '../store/useTimer';
 
-interface Props {
-    laps: string[];
-}
+const Laps: FC = () => {
+    const laps = useTimer((state) => state.laps);
 
-const Laps: FC<Props> = ({ laps }) => {
     return (
         <>
             {laps.map((lap, index) => (
@@ -19,7 +18,4 @@ const Laps: FC<Props> = ({ laps }) => {
     );
 };
 
-export default memo(
-    Laps,
-    (prevProps, nextProps) => prevProps.laps.length === nextProps.laps.length
-);
+export default Laps;

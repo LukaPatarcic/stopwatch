@@ -1,40 +1,38 @@
-import React, { FC, memo } from "react";
-import { Button } from "react-native";
+import React, { FC } from "react";
+import { View } from 'react-native';
+import {useTimer} from "../store/useTimer";
+import { IconButton } from 'react-native-paper';
 
-interface Props {
-    running: boolean;
-    onStop: () => void;
-    onStart: () => void;
-    onReset: () => void;
-    onLap: () => void;
-}
+const ICON_SIZE = 42;
 
-const Actions: FC<Props> = ({ running, onStop, onStart, onReset, onLap }) => {
+const Actions: FC = () => {
+    const elapsed = useTimer((state) => state.elapsed)
+    const running = useTimer((state) => state.running)
+    const onStop = useTimer((state) => state.onStop)
+    const onStart = useTimer((state) => state.onStart)
+    const onReset = useTimer((state) => state.onReset)
+    const onLap = useTimer((state) => state.onLap)
+
     return (
-        <>
-            <Button
-                onPress={() => (running ? onStop() : onStart())}
-                title={running ? "Stop Timer" : "Start Timer"}
-                color="#841584"
-                accessibilityLabel="Learn more about this purple button"
-            />
-            <Button
+        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'flex-end' }}>
+            {elapsed && <IconButton
+                size={ICON_SIZE}
                 onPress={onReset}
-                title="Reset Timer"
-                color="#841584"
-                accessibilityLabel="Learn more about this purple button"
+                icon="restart"
+            />}
+            <IconButton
+                size={ICON_SIZE}
+                icon={running ? "stop" : "play"}
+                animated
+                onPress={() => (running ? onStop() : onStart())}
             />
-            <Button
+            {elapsed && running && <IconButton
+                size={ICON_SIZE}
                 onPress={onLap}
-                title="Lap Time"
-                color="#841584"
-                accessibilityLabel="Learn more about this purple button"
-            />
-        </>
+                icon="timer"
+            />}
+        </View>
     );
 };
 
-export default memo(
-    Actions,
-    (prevProps, nextProps) => prevProps.running === nextProps.running
-);
+export default Actions;
