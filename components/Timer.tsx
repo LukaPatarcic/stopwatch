@@ -23,7 +23,9 @@ const Timer: FC = () => {
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View>
-                <Text style={{ fontSize: 72 }}>{time ?? '00:00:00'}</Text>
+                <Text adjustsFontSizeToFit numberOfLines={1} style={{ fontSize: 72 }}>
+                    {time ?? '00:00:00'}
+                </Text>
             </View>
         </View>
     );

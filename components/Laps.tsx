@@ -4,7 +4,7 @@ import { useTimer } from '../store/useTimer';
 
 const Laps: FC = () => {
     const laps = useTimer((state) => state.laps);
-
+    if (!laps.length) return null;
     return (
         <FlatList
             data={laps}
@@ -17,7 +17,7 @@ const Laps: FC = () => {
                     style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}
                 >
                     <Text style={{ fontSize: 18 }}>
-                        #{index + 1} - {item}
+                        #{laps.length - index} - {item}
                     </Text>
                 </View>
             )}

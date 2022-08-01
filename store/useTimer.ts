@@ -64,7 +64,7 @@ export const useTimer = create<ITimer>()(
                     laps: [],
                 });
             },
-            onLap: () => set(({ laps, time }) => ({ laps: [...laps, time] })),
+            onLap: () => set(({ laps, time }) => ({ laps: [time, ...laps] })),
         }),
         { name: 'timer-storage', getStorage: () => AsyncStorage }
     )

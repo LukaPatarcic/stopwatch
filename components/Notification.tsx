@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
-import { formatTimer, useTimer } from '../store/useTimer';
+import { useTimer } from '../store/useTimer';
 import {
     cancelScheduledNotificationAsync,
     dismissNotificationAsync,
@@ -11,8 +11,6 @@ import {
     NotificationAction,
     AndroidNotificationPriority,
 } from 'expo-notifications';
-import * as BackgroundFetch from 'expo-background-fetch';
-import * as TaskManager from 'expo-task-manager';
 
 setNotificationHandler({
     handleNotification: async () => ({
@@ -48,42 +46,18 @@ const Notification = () => {
     const onReset = useTimer((state) => state.onReset);
     const onLap = useTimer((state) => state.onLap);
 
-    const BACKGROUND_FETCH_TASK = 'background-fetch';
-
-    // 1. Define the task by providing a name and the function that should be executed
-    // Note: This needs to be called in the global scope (e.g outside of your React components)
-    TaskManager.defineTask(BACKGROUND_FETCH_TASK, async () => {
-        const now = Date.now();
-        console.log(`Got background fetch call at date: ${new Date(now).toISOString()}`);
-        setTime();
-        // Be sure to return the successful result type!
-        return BackgroundFetch.BackgroundFetchResult.NewData;
-    });
-
-    async function registerBackgroundFetchAsync() {
-        return BackgroundFetch.registerTaskAsync(BACKGROUND_FETCH_TASK, {
-            minimumInterval: 1,
-            stopOnTerminate: false, // android only,
-            startOnBoot: true, // android only
-        });
-    }
-    async function unregisterBackgroundFetchAsync() {
-        return BackgroundFetch.unregisterTaskAsync(BACKGROUND_FETCH_TASK);
-    }
-
     useEffect(() => {
-        const subscription = AppState.addEventListener('change', _handleAppStateChange);
+        const subscription1 = AppState.addEventListener('change', _handleAppStateChange);
+        const subscription2 = addNotificationResponseReceivedListener((response) => {
+            handleAction(response.actionIdentifier);
+        });
         return () => {
-            subscription.remove();
+            subscription1.remove();
+            subscription2.remove();
         };
     }, []);
 
-    useEffect(() => {
-        const subscription = addNotificationResponseReceivedListener((response) => {
-            handleAction(response.actionIdentifier);
-        });
-        return () => subscription.remove();
-    }, []);
+    // Add a BackgroundFetch event to <FlatList>
 
     const handleAction = (action: string) => {
         switch (action) {
@@ -107,7 +81,6 @@ const Notification = () => {
 
     useEffect(() => {
         if (appStateVisible === 'background' && running) {
-            registerBackgroundFetchAsync();
             scheduleNotificationAsync({
                 content: {
                     categoryIdentifier: CATEGORY_ID,
@@ -122,7 +95,6 @@ const Notification = () => {
         }
 
         if (appStateVisible === 'active' && running) {
-            unregisterBackgroundFetchAsync();
             cancelScheduledNotificationAsync(NOTIFICATION_ID);
             dismissNotificationAsync(NOTIFICATION_ID);
         }
