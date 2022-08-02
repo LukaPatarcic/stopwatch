@@ -44,13 +44,12 @@ export const useTimer = create<ITimer>()(
             onStart: () =>
                 set(({ elapsed, startTime, timeDate }) => {
                     const now = new Date();
-                    const continueTime = new Date(
-                        now.valueOf() + (startTime?.valueOf() - timeDate.valueOf())
-                    );
                     return {
                         running: true,
                         elapsed: true,
-                        startTime: elapsed ? continueTime : now,
+                        startTime: elapsed
+                            ? new Date(now.valueOf() + (startTime?.valueOf() - timeDate.valueOf()))
+                            : now,
                     };
                 }),
             onStop: () => set({ running: false, elapsed: true, stopTime: new Date() }),
