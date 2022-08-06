@@ -3,10 +3,9 @@ import { persist } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface ITimer {
-    time: string;
+    time: string | null;
     timeDate: Date | null;
     startTime: Date | null;
-    stopTime: Date | null;
     running: boolean;
     elapsed: boolean;
     laps: string[];
@@ -22,7 +21,8 @@ export const formatTimer = (timeElapsed: number | null) => {
     const milliseconds = String(parseInt(String((timeElapsed % 1000) / 10))).padStart(2, '0');
     const seconds = String(parseInt(String((timeElapsed / 1000) % 60))).padStart(2, '0');
     const minutes = String(parseInt(String((timeElapsed / (1000 * 60)) % 60))).padStart(2, '0');
-    return `${minutes}:${seconds}.${milliseconds}`;
+    const hours = String(parseInt(String(timeElapsed / 3600000))).padStart(2, '0');
+    return `${hours !== '00' ? `${hours}:` : ''}${minutes}:${seconds}.${milliseconds}`;
 };
 
 export const useTimer = create<ITimer>()(
@@ -31,13 +31,12 @@ export const useTimer = create<ITimer>()(
             time: null,
             timeDate: null,
             startTime: null,
-            stopTime: null,
             running: false,
             elapsed: false,
             laps: [],
             setTime: () =>
                 set(({ startTime }) => {
-                    if (!startTime) return;
+                    if (!startTime) return {};
                     const newTime = formatTimer(new Date().valueOf() - startTime.valueOf());
                     return { time: newTime, timeDate: new Date() };
                 }),
@@ -48,22 +47,30 @@ export const useTimer = create<ITimer>()(
                         running: true,
                         elapsed: true,
                         startTime: elapsed
-                            ? new Date(now.valueOf() + (startTime?.valueOf() - timeDate.valueOf()))
+                            ? new Date(now.valueOf() + (startTime!.valueOf() - timeDate!.valueOf()))
                             : now,
                     };
                 }),
-            onStop: () => set({ running: false, elapsed: true, stopTime: new Date() }),
+            onStop: () =>
+                set(({ startTime }) => ({
+                    running: false,
+                    elapsed: true,
+                    time: formatTimer(new Date().valueOf() - startTime!.valueOf()),
+                })),
             onReset: () => {
                 set({
                     running: false,
                     elapsed: false,
                     startTime: null,
-                    stopTime: null,
                     time: null,
                     laps: [],
                 });
             },
-            onLap: () => set(({ laps, time }) => ({ laps: [time, ...laps] })),
+            onLap: () =>
+                set(({ laps, time }) => {
+                    if (!time) return { laps };
+                    return { laps: [time, ...laps] };
+                }),
         }),
         { name: 'timer-storage', getStorage: () => AsyncStorage }
     )

@@ -32,5 +32,6 @@
       </intent-filter>
     </activity>
     <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
+    <receiver android:name="com.dieam.reactnativepushnotification.modules.RNPushNotificationActions" />
   </application>
 </manifest>

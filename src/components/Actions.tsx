@@ -1,9 +1,13 @@
 import React, { FC } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTimer } from '../store/useTimer';
 import { IconButton } from 'react-native-paper';
 
 const ICON_SIZE = 42;
+
+const styles = StyleSheet.create({
+    container: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center' },
+});
 
 const Actions: FC = () => {
     const elapsed = useTimer((state) => state.elapsed);
@@ -14,7 +18,7 @@ const Actions: FC = () => {
     const onLap = useTimer((state) => state.onLap);
 
     return (
-        <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center' }}>
+        <View style={styles.container}>
             {elapsed && <IconButton size={ICON_SIZE} onPress={onReset} icon="restart" />}
             <IconButton
                 size={ICON_SIZE}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { SafeAreaView, StyleSheet, View } from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet, View } from 'react-native';
 import Actions from './components/Actions';
 import Laps from './components/Laps';
 import Timer from './components/Timer';
@@ -18,6 +18,7 @@ const App = () => {
     return (
         <PaperProvider>
             <SafeAreaView style={styles.container}>
+                <StatusBar animated={true} backgroundColor="#c3c3c3" />
                 <Notification />
                 <View style={{ flex: 1 }}>
                     <Timer />
