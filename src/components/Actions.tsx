@@ -19,14 +19,19 @@ const Actions: FC = () => {
 
     return (
         <View style={styles.container}>
-            {elapsed && <IconButton size={ICON_SIZE} onPress={onReset} icon="restart" />}
+            {elapsed && (
+                <IconButton color="black" size={ICON_SIZE} onPress={onReset} icon="restart" />
+            )}
             <IconButton
                 size={ICON_SIZE}
+                color="black"
                 icon={running ? 'stop' : 'play'}
                 animated
                 onPress={() => (running ? onStop() : onStart())}
             />
-            {elapsed && running && <IconButton size={ICON_SIZE} onPress={onLap} icon="timer" />}
+            {elapsed && running && (
+                <IconButton color="black" size={ICON_SIZE} onPress={onLap} icon="timer" />
+            )}
         </View>
     );
 };
